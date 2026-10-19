@@ -29,7 +29,7 @@
 当前支持 macOS / Linux，Python 3.10+（含 SQLite FTS5）。本插件使用文件锁和符号链接，尚未验证 Windows。准备一个包含文字层 PDF 的目录；扫描件需要另做 OCR。
 
 ```sh
-git clone git@github.com:xychendave/deepseek-hv-literature.git
+git clone https://github.com/xychendave/deepseek-hv-literature.git
 cd deepseek-hv-literature
 python3 -m venv .venv
 .venv/bin/python -m pip install -r requirements.txt
@@ -39,7 +39,7 @@ python3 -m venv .venv
 ./hv-literature dashboard
 ```
 
-仓库为私有，克隆账号需有访问权限。请把 `$HOME/papers` 替换成实际目录。多个目录重复传入 `--library-root`；后续直接修改本机的 `config.json`。`init` 不覆盖已有配置。
+仓库公开，可直接克隆。请把 `$HOME/papers` 替换成实际目录。多个目录重复传入 `--library-root`；后续直接修改本机的 `config.json`。`init` 不覆盖已有配置。
 
 `hv-literature` 优先使用 `HV_PYTHON` 指定的解释器，其次使用本项目 `.venv`、本机 Codex bundled Python，最后使用 PATH 中的 `python3`。移动项目后需重新运行安装器，让 MCP 路径跟随新位置。
 
@@ -141,7 +141,7 @@ python3 -m venv .venv
 
 PDF 原文件只读，索引和摘录保存在本机。OpenAlex 只接收检索关键词与认证信息，不接收本地 PDF。调用宿主模型分析、改写时，返回的论文片段会进入该宿主的模型上下文，受其服务设置约束。
 
-Git 忽略 `config.json`、凭据、PDF/Excel、数据库、报告、摘录与包含全文片段的 HTML；仓库只包含源码和示例配置。私有仓库也不应存放这些资料。
+Git 忽略 `config.json`、凭据、PDF/Excel、数据库、报告、摘录与包含全文片段的 HTML；公开仓库只包含源码和示例配置。使用者的论文与运行数据保存在各自本机。
 
 ## 工程组成
 
@@ -170,5 +170,9 @@ GitHub 保存完整可重建的工程；安装时生成的本机路径、运行�
 卡片版可以在卡片详情点击“卸载”，或对同一 DSH_HOME 执行 `dsh plugin --profile desktop remove @xychendave/dsh-hv-literature`。再删除本项目对应的 Skill 符号链接即可；不要删除其他 Skill。库和原始 PDF 不会因此删除。
 
 旧版 `--mcp-only` 安装需要删除相应 profile 的 `# BEGIN hv-literature managed block` 到 `# END hv-literature managed block` 部分。恢复备份前检查是否有其他后续配置改动，避免覆盖整份新配置。停用日报需要另外在 Codex 停用对应自动化；Harness 卡片开关只控制 Harness 中的工具。
+
+## 开源许可证
+
+本项目源码采用 [MIT License](LICENSE)。论文、期刊目录及第三方数据的权利归各自权利人所有，不属于本项目的开源授权范围。
 
 接口参考：[DeepSeek Harness 官方项目](https://github.com/deepseek-ai/deepseek-harness)、[Harness 配置定义](https://github.com/deepseek-ai/deepseek-harness/blob/master/docs/config-catalog.md)、[OpenAlex 认证](https://help.openalex.org/api/authentication/)。

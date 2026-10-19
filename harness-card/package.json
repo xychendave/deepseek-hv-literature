@@ -2,6 +2,7 @@
   "name": "@xychendave/dsh-hv-literature",
   "version": "0.2.0",
   "private": true,
+  "license": "MIT",
   "description": "Local electrical-engineering papers, page-linked writing evidence, and OpenAlex literature digests.",
   "type": "module",
   "main": "index.js",
