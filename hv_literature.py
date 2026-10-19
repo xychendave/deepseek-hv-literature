@@ -24,7 +24,7 @@ import urllib.request
 from zoneinfo import ZoneInfo
 
 ROOT = Path(__file__).resolve().parent
-VERSION = "0.1.0"
+VERSION = "0.2.0"
 ROLE_CUES = {
     "advantages": ["advantage", "efficient", "efficiency", "robust", "benefit", "outperform", "superior", "accurate", "优势", "优点", "高效", "鲁棒", "准确"],
     "limitations": ["limitation", "limited", "drawback", "however", "challenge", "difficult", "suffer", "expensive", "fails", "disadvantage", "缺点", "局限", "不足", "难以", "然而", "耗时"],

@@ -1,12 +1,12 @@
 # DeepSeek Harness 高电压文献助手
 
-本地论文知识库 + 可溯源写作辅助 + OpenAlex 文献日报。以 **MCP stdio 服务和 hv-literature Skill** 接入 DeepSeek Harness，也可在 Codex 或终端使用。
+本地论文知识库 + 可溯源写作辅助 + OpenAlex 文献日报。以 **原生 Harness 插件卡片、MCP stdio 服务和 hv-literature Skill** 接入 DeepSeek Harness，也可在 Codex 或终端使用。
 
-已在 DeepSeek Harness 0.2.0-rc.2 上验证：服务加载、MCP 握手、5 个工具发现和真实论文检索。这是本地工具插件，没有单独的商店页面或聊天侧栏界面。
+安装后在 **插件 → 已安装插件 → 高电压文献助手** 中查看，支持图标、中文说明、启用/停用开关、组件运行状态与卸载。v0.2.0 已在本机 Harness 桌面端验证卡片展示和组件启停；底层复用官方 MCP 桥接组件，提供 5 个文献工具。卡片是管理入口，检索与写作在对话中完成。
 
 ## 直接在 Harness 中使用
 
-安装后新建对话，复制任一示例：
+先确认卡片开关为启用，详情显示“1 运行中”，然后新建对话，复制任一示例：
 
 > 使用 hv-literature，从我的本地论文中找“全纯嵌入方法的优势和局限”。给出论文题目、PDF 页码、本地路径和少量原句；回读原页后，分析句子如何组织，再帮我写一段中文论述，保留出处与适用条件。
 
@@ -14,7 +14,7 @@
 
 > 使用 hv-literature，生成今天的文献日报：绝缘气体分子设计、声光电融合故障诊断两个方向合计约 10 篇。整理成中文阅读建议，标明发表日期、来源和推荐理由，保存 Markdown。较早论文明确标为补充阅读。
 
-如果未自动选择 Skill，可明确要求调用 `mcp__hv_research__library_status`。若工具列表不存在，检查安装位置并重启 Harness；模型访问凭据由 Harness 自己配置。
+如果未自动选择 Skill，可明确要求调用 `mcp__hv_research__library_status`。模型访问凭据由 Harness 自己配置。看不到卡片时，先按下文检查实际客户端使用的 profile，避免把插件装到另一个隔离实例。
 
 | 工具 | 用途 |
 | --- | --- |
@@ -53,9 +53,9 @@ python3 -m venv .venv
 
 当前适配的 Excel 格式为首行标题，默认工作表 `期刊目录`：A 序号、B 刊名、C 国家/地区、D ISSN/EISSN、E 出版商、F 学科、G 期刊层级。B/D/G 标题必须分别为 `刊名`、`ISSN/EISSN`、`期刊层级`。匹配结果保留原始表行号；没有期刊表也能使用日报。层级来自用户目录，不代表最新 JCR 或中科院分区。
 
-### 接入 DeepSeek Harness
+### 安装原生插件卡片
 
-先启动一次官方 Harness，使实际使用的 profile 目录存在。确认 **正在使用的 DSH_HOME**；若有多个隔离实例，必须选择对应目录。安装器不猜测该位置。
+先启动一次官方 Harness，并安装其 `dsh` CLI（`dsh --version` 应能运行）。确认 **当前桌面客户端实际使用的 DSH_HOME**；若有多个隔离实例，必须选择对应目录。常规桌面安装通常是 `~/.dsh`，自定义启动时以实际路径为准。安装器不猜测该位置，也不修改其他 profile。安装还需要 CLI 可调用的 pnpm。
 
 ```sh
 .venv/bin/python install_dsh.py --dsh-home "/absolute/path/to/dsh-home" --profile desktop --dry-run
@@ -65,11 +65,27 @@ python3 -m venv .venv
 如同时使用 web profile，增加 `--profile web`。也可以从环境变量 `DSH_HOME` 读取目录。
 
 安装器会：
-- 在相应的 `profiles/<profile>/cordis.patch.yml` 中添加一个有标记的 MCP 配置块，修改前自动备份。
-- 将 Skill 链接到 `~/.agents/skills/hv-literature` 和 `~/.codex/skills/hv-literature`，遇到同名但不属于本项目的 Skill 时停止，避免覆盖。
-- 在本地 `data/installation.json` 记录安装位置；重复运行不会添加重复配置块。
 
-重启 Harness 后新建对话。只使用 Codex 时，可将本项目 `skill/hv-literature` 链接到 Codex 的 skills 目录，然后让 Agent 使用 CLI。通用 MCP 客户端使用绝对路径 `<项目根目录>/hv-literature`，参数为 `["mcp"]`，无需 HTTP 端口。
+- 从 `harness-card/` 生成本机插件包 `data/harness-plugin/`，将当前项目的绝对路径写入生成的 MCP 配置；生成包不包含 PDF、凭据或数据库。
+- 通过官方命令 `dsh plugin --profile <profile> add link:<生成目录>` 登记原生 bundle，使卡片出现在插件列表。包名为 `@xychendave/dsh-hv-literature`，无额外 npm 依赖。
+- 如已安装旧版直接 MCP 配置，先备份并移除本插件的旧托管块，避免重复注册同一工具。安装命令失败或超时时恢复旧块；其他插件配置保留。
+- 将 Skill 链接到 `~/.agents/skills/hv-literature` 和 `~/.codex/skills/hv-literature`，遇到其他同名 Skill 时停止，避免覆盖。
+- 在本地 `data/card-installation.json` 记录安装位置与备份。重复安装更新生成包，保留卡片的启停状态。
+
+在 Harness 的插件页面点击“刷新”。如宿主提示需要重启，再重启客户端。打开「高电压文献助手」卡片，确认开关开启、组件显示“运行中”，然后新建对话。
+
+`harness-card/` 是模板源码，请使用安装器生成并登记本机包；不要直接把模板目录当作已构建插件安装。生成包链接到整个项目的 Python 程序，因此移动或删除项目会影响插件，移动后需重新安装。
+
+仅需旧版 MCP 接入时，可加 `--mcp-only`，这不会创建卡片；已安装卡片时不能混用此选项。通过 `--dsh-command /path/to/dsh` 可指定另一份官方 CLI。
+
+只使用 Codex 时，可将本项目 `skill/hv-literature` 链接到 Codex 的 skills 目录，然后让 Agent 使用 CLI。通用 MCP 客户端使用绝对路径 `<项目根目录>/hv-literature`，参数为 `["mcp"]`，无需 HTTP 端口。
+
+### 卡片未显示或工具不可用
+
+1. 确认安装命令中的 `--dsh-home` 对应正在打开的客户端，而非另一个 web/隔离实例。macOS 可只读查看 `ps -axo pid,ppid,command` 中 `dsh-desktop-host/lib/index.js` 后面的 profile 路径。
+2. 在“插件”页面刷新，检查“已安装插件”中的卡片；打开详情查看组件运行状态。卡片可见但开关关闭时，手动启用。
+3. 运行 `./hv-literature status` 与 `.venv/bin/python verify_mcp.py` 检查本地配置、Python 依赖和 MCP 服务。低文字量页不代表插件加载失败。
+4. 仍无工具时检查宿主是否提示需要重启；不要重复在用户 patch 中添加第二份同名 MCP 配置。
 
 ### 配置 OpenAlex 日报凭据
 
@@ -127,6 +143,20 @@ PDF 原文件只读，索引和摘录保存在本机。OpenAlex 只接收检索�
 
 Git 忽略 `config.json`、凭据、PDF/Excel、数据库、报告、摘录与包含全文片段的 HTML；仓库只包含源码和示例配置。私有仓库也不应存放这些资料。
 
+## 工程组成
+
+| 文件或目录 | 内容 |
+| --- | --- |
+| `hv_literature.py`、`hv-literature` | SQLite 知识库、检索、OpenAlex 日报与 MCP 服务 |
+| `dashboard.py` | 本地知识库 HTML 生成器 |
+| `harness-card/` | 原生卡片的包声明、图标、中英文说明与入口 |
+| `install_dsh.py`、`install_card.py` | 安装、旧配置迁移、生成本机 bundle 与失败恢复 |
+| `skill/hv-literature/` | Agent 的检索、回读与写作工作流 |
+| `config.example.json`、`configure_key.py` | 可移植示例配置与本机隐藏凭据输入 |
+| `test_*.py`、`verify_mcp.py`、`.github/workflows/` | 离线测试、MCP 冒烟测试与 GitHub CI |
+
+GitHub 保存完整可重建的工程；安装时生成的本机路径、运行数据和个人资料不进入 Git。
+
 ## 验证与卸载
 
 ```sh
@@ -137,6 +167,8 @@ Git 忽略 `config.json`、凭据、PDF/Excel、数据库、报告、摘录与�
 
 测试使用临时合成 PDF、模拟 API 和临时 Harness profile，不读取真实论文或联网取文献。MCP 冒烟测试读取当前本地库状态与工具列表，输出统计，不打印论文原文或凭据。
 
-卸载时，从所安装 profile 的 patch 中删除 `# BEGIN hv-literature managed block` 到 `# END hv-literature managed block` 的部分，并删除本项目对应的两个 Skill 符号链接，再重启 Harness。也可参考本地安装清单中的备份；有后续配置改动时不要直接覆盖整份文件。停用日报需要另外在 Codex 停用对应自动化。
+卡片版可以在卡片详情点击“卸载”，或对同一 DSH_HOME 执行 `dsh plugin --profile desktop remove @xychendave/dsh-hv-literature`。再删除本项目对应的 Skill 符号链接即可；不要删除其他 Skill。库和原始 PDF 不会因此删除。
+
+旧版 `--mcp-only` 安装需要删除相应 profile 的 `# BEGIN hv-literature managed block` 到 `# END hv-literature managed block` 部分。恢复备份前检查是否有其他后续配置改动，避免覆盖整份新配置。停用日报需要另外在 Codex 停用对应自动化；Harness 卡片开关只控制 Harness 中的工具。
 
 接口参考：[DeepSeek Harness 官方项目](https://github.com/deepseek-ai/deepseek-harness)、[Harness 配置定义](https://github.com/deepseek-ai/deepseek-harness/blob/master/docs/config-catalog.md)、[OpenAlex 认证](https://help.openalex.org/api/authentication/)。

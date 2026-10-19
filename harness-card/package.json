@@ -1,0 +1,17 @@
+{
+  "name": "@xychendave/dsh-hv-literature",
+  "version": "0.2.0",
+  "private": true,
+  "description": "Local electrical-engineering papers, page-linked writing evidence, and OpenAlex literature digests.",
+  "type": "module",
+  "main": "index.js",
+  "icon": "./icon.svg",
+  "exports": {
+    ".": "./index.js",
+    "./package.json": "./package.json",
+    "./cordis.patch.yml": "./cordis.patch.yml",
+    "./locale/*.json": "./locale/*.json"
+  },
+  "files": ["index.js", "icon.svg", "locale", "cordis.patch.yml"],
+  "dsh": {"bundle": {"patch": "./cordis.patch.yml"}}
+}

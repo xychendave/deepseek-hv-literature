@@ -1,4 +1,4 @@
-"""Register the local stdio MCP service and Skill in existing Harness profiles."""
+"""Install the native Harness card, MCP service and Skill in a chosen profile."""
 import argparse
 import datetime
 import json
@@ -83,13 +83,24 @@ def main():
     parser.add_argument("--profile", action="append", help="已存在的 profile，可重复指定；默认 desktop")
     parser.add_argument("--skill-dir", action="append", help="Skill 根目录，可重复指定；默认 ~/.agents/skills 与 ~/.codex/skills")
     parser.add_argument("--dry-run", action="store_true")
+    parser.add_argument("--mcp-only", action="store_true", help="旧版接入：只登记 MCP，不安装可见卡片")
+    parser.add_argument("--dsh-command", default="dsh", help="官方 Harness CLI 名称或绝对路径")
     args = parser.parse_args()
     if not args.dsh_home:
         parser.error("请用 --dsh-home 指定正在使用的 Harness 数据目录，避免误装到其他实例")
     try:
-        result = install(args.dsh_home, args.profile or ["desktop"],
-                         args.skill_dir or [str(Path.home()/".agents/skills"), str(Path.home()/".codex/skills")], args.dry_run)
-    except (ValueError, OSError) as e:
+        profiles = args.profile or ["desktop"]
+        skills = args.skill_dir or [str(Path.home()/".agents/skills"), str(Path.home()/".codex/skills")]
+        if args.mcp_only:
+            for profile in profiles:
+                manifest = Path(args.dsh_home).expanduser()/"profiles"/profile/"package.json"
+                if manifest.exists() and "@xychendave/dsh-hv-literature" in json.loads(manifest.read_text()).get("dependencies", {}):
+                    raise ValueError("已安装卡片版，请去掉 --mcp-only，避免重复注册 MCP")
+            result = install(args.dsh_home, profiles, skills, args.dry_run)
+        else:
+            from install_card import install_card
+            result = install_card(ROOT, args.dsh_home, profiles, skills, args.dry_run, args.dsh_command)
+    except (ValueError, RuntimeError, OSError) as e:
         parser.exit(1, str(e)+"\n")
     print(json.dumps(result, ensure_ascii=False, indent=2))
 
