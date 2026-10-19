@@ -1,0 +1,13 @@
+#!/bin/sh
+set -eu
+ROOT=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+if [ -n "${HV_PYTHON:-}" ]; then
+  PY="$HV_PYTHON"
+elif [ -x "$ROOT/.venv/bin/python3" ]; then
+  PY="$ROOT/.venv/bin/python3"
+elif [ -x "$HOME/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3" ]; then
+  PY="$HOME/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3"
+else
+  PY=python3
+fi
+exec "$PY" "$ROOT/hv_literature.py" "$@"

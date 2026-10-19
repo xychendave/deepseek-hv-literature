@@ -1,0 +1,36 @@
+{
+  "timezone": "Asia/Shanghai",
+  "library_roots": [
+    "~/papers"
+  ],
+  "journal_file": "",
+  "journal_sheet": "期刊目录",
+  "credential_file": "~/.config/hv-literature/credentials.json",
+  "daily_limit": 10,
+  "recent_days": 30,
+  "backfill_days": 365,
+  "topics": {
+    "gas": {
+      "name": "绝缘气体：分子结构、构效关系与多目标筛选",
+      "queries": [
+        "\"insulating gas\" \"machine learning\"",
+        "\"dielectric strength\" \"molecular\"",
+        "\"SF6 alternatives\"",
+        "\"fluoronitrile\"",
+        "\"insulating gas\" \"design\"",
+        "\"insulating gas\" \"screening\""
+      ]
+    },
+    "fault": {
+      "name": "声光电融合：缺陷识别、强度分级与趋势预测",
+      "queries": [
+        "\"partial discharge\" \"fusion\"",
+        "\"partial discharge\" \"multimodal\"",
+        "\"partial discharge\" \"acoustic\" \"optical\"",
+        "\"insulation\" \"fault\" \"multi-sensor\"",
+        "\"partial discharge\" \"prediction\"",
+        "\"high voltage\" \"defect\" \"deep learning\""
+      ]
+    }
+  }
+}
